@@ -102,7 +102,7 @@ tang@ubuntu:~$ cat ~/.ipfs/config
 ......
 ```
 
-启动ipfs daemon
+- 启动ipfs daemon
 ```
 tang@ubuntu:~$ ipfs daemon
 Initializing daemon...
