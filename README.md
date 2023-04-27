@@ -58,7 +58,21 @@ ipfs-crawler 可以从boostrappers开始，不断获得未访问过的节点的k
   - agent_version
   Example: 
 ```json
-{'NodeID': '12D3KooWSSWpPrUnhC6MbpwGka2AiLASW3nvsdtUYHLZf7L8LQkT', 'MultiAddrs': ['/ip4/127.0.0.1/udp/4001/quic', '/ip4/137.184.46.49/tcp/4001', '/ip4/127.0.0.1/tcp/4001', '/ip4/10.244.3.195/tcp/4001', '/ip4/137.184.46.49/udp/39162/quic', '/ip6/::1/udp/4001/quic', '/ip4/10.244.3.195/udp/4001/quic', '/ip6/::1/tcp/4001'], 'reachable': True, 'agent_version': 'kubo/0.14.0/e0fabd6'}
+{
+    "NodeID":"12D3KooWSSWpPrUnhC6MbpwGka2AiLASW3nvsdtUYHLZf7L8LQkT",
+    "MultiAddrs":[
+        "/ip4/127.0.0.1/udp/4001/quic",
+        "/ip4/137.184.46.49/tcp/4001",
+        "/ip4/127.0.0.1/tcp/4001",
+        "/ip4/10.244.3.195/tcp/4001",
+        "/ip4/137.184.46.49/udp/39162/quic",
+        "/ip6/::1/udp/4001/quic",
+        "/ip4/10.244.3.195/udp/4001/quic",
+        "/ip6/::1/tcp/4001"
+    ],
+    "reachable":true,
+    "agent_version":"kubo/0.14.0/e0fabd6"
+}
 ```
 其中[IPFS-Measurement-SIGCOMM22](#ipfs-measurement-sigcomm22)根据Addrs中的ip所在地进行了分析，还有[IPFS-Churn-ICDCSW22](#ipfs-churn-icdcsw22)对agent_version的更新情况进行监测分析，有了上述数据后这些内容的复现都是不难的  
 PS. 暂未深入源码分析是否连接失败时会重试，这会影响reachable的正确性与爬取的范围，之后可以看看  
