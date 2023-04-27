@@ -11,10 +11,11 @@
   - [go-ipfs(kubo) 被动爬取ipfs中的peers](#go-ipfs(kubo) 被动爬取ipfs中的peers)
   - [hydra-booster 被动爬取ipfs中的peers](#hydra-booster 被动爬取ipfs中的peers)
   - [nebula-crawler 主动爬取DHT_server](#nebula-crawler 主动爬取DHT_server)
-- [Problems That Confuse Me](#Problems That Confuse Me)
+- [疑惑的点](#疑惑的点)
 
 ## 简介
 主要工作专注于数据收集，对论文中数据分析的部分并未复现。整体工作思路为以论文为单位来复现论文中收集数据的方法。
+
 ## Thesis
 ### Crawling-IPFS-Networking20-Demo
 该论文仅提供了一种数据采集的工具，即ipfs-crawler，详情可见[ipfs-crawler 主动爬取DHT_server](#ipfs-crawler 主动爬取DHT_server)
@@ -170,11 +171,29 @@ hydra相当于设置了多个kubo Instances，每个kubo instance被其称作一
 **有问题的点：**
 其数据同样跟论文的数据对不上
 ```
+tang@ubuntu:~/clone_file/hydra-booster$ go run ./main.go -name hydra_0  -port-begin 4002 -nheads 5   -httpapi-addr 192.168.0.107:7779
+......
+[NumHeads: 0, Uptime: 5s, MemoryUsage: 62 MB, PeersConnected: 146, TotalUniquePeersSeen: 157, BootstrapsDone: 5, ProviderRecords: 0, 
+......
+[NumHeads: 0, Uptime: 3m0s, MemoryUsage: 182 MB, PeersConnected: 1500, TotalUniquePeersSeen: 3716, BootstrapsDone: 5, ProviderRecords: 0, 
+......
+[NumHeads: 0, Uptime: 6m0s, MemoryUsage: 236 MB, PeersConnected: 2261, TotalUniquePeersSeen: 5333, BootstrapsDone: 5, ProviderRecords: 357501, 
+......
+[NumHeads: 0, Uptime: 15m2s, MemoryUsage: 355 MB, PeersConnected: 3199, TotalUniquePeersSeen: 8565, BootstrapsDone: 5, ProviderRecords: 366893
+......
+[NumHeads: 0, Uptime: 1h50m6s, MemoryUsage: 335 MB, PeersConnected: 3525, TotalUniquePeersSeen: 11632, BootstrapsDone: 5, ProviderRecords: 534816, 
+......
 
 ```
-其
+其PeersConnected增长到3k+后增长缓慢，而且在3h后PeersConnected会大幅下降，这与论文中的数据严重不符
 不知道是不是ipfs版本更新出了一些新的策略来针对hydra-booster这类爬虫
+
 ### nebula-crawler 主动爬取DHT_server
+github: https://github.com/dennis-tra/nebula
+与[ipfs-crawler 主动爬取DHT_server](#ipfs-crawler 主动爬取DHT_server)较为相似，实现原理上基本一样，目前还未深入了解过与ipfs-crawler细节上的不同（如性能、监控等）
 
-## Problems That Confuse Me
-
+## 疑惑的点
+ipfs的swarm：
+- 如何找到peers？
+- 什么时候决定连接什么时候决定断开？
+- hydra-booster是否也遵循这样的规则？
