@@ -79,7 +79,7 @@ SOURCE;TARGET;ONLINE;TIMESTAMP
 ```
 
 如下为连续爬取10小时所得的数据，爬取间隔为死循环，即上次爬取结束后下次爬取立即开始，共爬取160次
-TODOTODO123123123 PIC
+![crawler_peers.png](./pics/crawler_peers.png)
 
 ### go-ipfs(kubo) 被动爬取ipfs中的peers
 github: https://github.com/ipfs/kubo
