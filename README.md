@@ -28,23 +28,73 @@
 论文通过上述工具，对数个时间段内的ipfs进行监控，并分析了Churn、网络规模、用户客户端等情况  
 
 **疑惑：**
-- #1 boost-hydra的结果不吻合，且论文中H1、H2、Hydra三条曲线的实验参数不清楚
-- #2 kubo的结果同样不吻合：P3中peers数目一直上涨，但是本地的情况则是上涨到一定的值（6k+）后会不在上涨甚至下跌，怀疑是peers主动断开连接，但是不清楚为什么不主动连接其他peers
-- #3 ipfs的swarm，如何找到peers，什么时候决定连接什么时候决定断开，跟是否为DHT server是否有关系 & hydra-booster是否也遵循这样的规则
+该文的Fig. 3中H1、H2、Hydra三条曲线的实验参数不清楚，复现时hydra&kubo与Fig. 3中的结果不吻合：  
+Fig. 3, P3中peers数目一直上涨，但是本地的情况则是上涨到一定的值（6k+）后会不在上涨甚至下跌，怀疑是peers主动断开连接，但是不清楚为什么不主动连接其他peers
 
 ### IPFS-ICDCS22
 主要思路是同kubo一样来建立peers之间的连接，之后通过监听peers的bitswap请求（want_have），来获取每个peer想获取的CID来分析  
-该论文的工具未开源，但在kubo的源代码上魔改应该是不难实现的  
-由于复现起来时间成本很大，暂未复现  
+该论文的工具未开源，但在kubo的源码的基础上修改下应该是不难实现的：  
+修改kubo中bitswap的log等级  
+```
+tang@ubuntu:~$ ipfs log level bitswap debug
+Changed log level of 'bitswap' to 'debug'
+tang@ubuntu:~$ ipfs log level bitswap-client debug
+Changed log level of 'bitswap-client' to 'debug'
+tang@ubuntu:~$ ipfs log level bitswap-server debug
+Changed log level of 'bitswap-server' to 'debug'
+tang@ubuntu:~$ ipfs log level bitswap_network debug
+Changed log level of 'bitswap_network' to 'debug'
+```
+可以看到类似的日志：  
+```
+2023-04-27T13:48:01.932Z        DEBUG   bitswap_network network/ipfs_impl.go:427        bitswap net handleNewStream from 12D3KooWDfrUc9KWYphepLsoGvFYqmHaahjBAKj2iFmY2nFDY2Wy
+```
+可以根据日志找到如下源码：  
+```go
+// handleNewStream receives a new stream from the network.
+func (bsnet *impl) handleNewStream(s network.Stream) {
+    defer s.Close()          
+                             
+    if len(bsnet.receivers) == 0 { 
+        _ = s.Reset()        
+        return               
+    }                        
+                             
+    reader := msgio.NewVarintReaderSize(s, network.MessageSizeMax)
+    for {                    
+        received, err := bsmsg.FromMsgReader(reader)
+        if err != nil {         
+            if err != io.EOF {
+                _ = s.Reset()
+                for _, v := range bsnet.receivers {
+                    v.ReceiveError(err)
+                }            
+                log.Debugf("bitswap net handleNewStream from %s error: %s", s.Conn().RemotePeer(), err)
+            }                
+            return           
+        }                    
+                             
+        p := s.Conn().RemotePeer()
+        ctx := context.Background()
+        log.Debugf("bitswap net handleNewStream from %s", s.Conn().RemotePeer())
+        bsnet.connectEvtMgr.OnMessage(s.Conn().RemotePeer())
+        atomic.AddUint64(&bsnet.stats.MessagesRecvd, 1)
+        for _, v := range bsnet.receivers {
+            v.ReceiveMessage(ctx, p, received)
+        }                    
+    }                        
+}  
+```
+应该可以从这个handle文件入手来记录我们需要的bitswap的信息，再往下我就没继续深入了  
 
 **疑惑：**
-bitswap的具体流程：为何论文中说如果收到了"want_have c"，如果没返回"have c"的话将不能进入该peer的session？还有，其中会漏掉哪些数据？
+bitswap的具体流程：为何论文中说如果收到了"want_have c"，如果没返回"have c"的话将不能进入该peer的session？如果未进入session的话会漏掉哪些数据？
 
 ### IPFS-Measurement-SIGCOMM22
 该论文主要用到了三个数据集：  
 - First Dataset: 抓取了所有DHT_server ，抓取工具：[nebula-crawler 主动爬取DHT_server](#nebula-crawler-主动爬取dht_server)  
 - Second Dataset: 拿了所有ipfs.io 网关的后台数据，这个我们拿不到  
-- Third Dataset: 相当于实验，publish & retrive，在A节点上发布一个任意文件后再在B节点上看多久能取回，并且统计寻找peers所消耗的时间与数据传输所消耗的时间，TODO  
+- Third Dataset: 相当于实验，publication & retrieval，在A节点上发布一个任意文件后再在B节点上看多久能取回，并且统计寻找peers所消耗的时间与数据传输所消耗的时间，将两台机器的时间校准后通过日志应该可以拿到publication & retrieval各部分所消耗的时间  
 
 ## Data Collection
 ### ipfs-crawler 主动爬取DHT_server
@@ -180,7 +230,12 @@ tang@ubuntu:~$ ipfs id 12D3KooWEFfELn8766a7DQaPmtCwRQMTxo1ibGjordKqXSS1xfS9
 
 **有问题的点：**
 按照论文中P2的设置（LowWater=18000, HighWater=20000）启动ipfs daemon后connected peers数量并未同论文中的结果一样呈现单调上涨且在10000+时趋于收敛。  
-复现时connected peers的数量在6000+左右达到峰值，并在三小时后下降至3000，我没能搞懂为什么会这样  
+**复现时**connected peers的数量在6000+左右达到峰值
+- LowWater=18000, HighWater=20000
+- ulimit -n 的值为655350 文件句柄数目是够的
+- 且可被另一台peer通过PID找到，说明处于DHT_server模式下  
+  
+不清楚为何与实验数据不符  
 
 ### hydra-booster 被动爬取ipfs中的peers
 github: https://github.com/libp2p/hydra-booster  
@@ -201,7 +256,14 @@ tang@ubuntu:~/clone_file/hydra-booster$ go run ./main.go -name hydra_0  -port-be
 ......
 [NumHeads: 0, Uptime: 1h50m6s, MemoryUsage: 335 MB, PeersConnected: 3525, TotalUniquePeersSeen: 11632, BootstrapsDone: 5, ProviderRecords: 534816, 
 ......
-
+[NumHeads: 0, Uptime: 2h56m16s, MemoryUsage: 402 MB, PeersConnected: 3517, TotalUniquePeersSeen: 12179, BootstrapsDone: 5, ProviderRecords: 539413,
+......
+[NumHeads: 0, Uptime: 2h57m42s, MemoryUsage: 551 MB, PeersConnected: 732, TotalUniquePeersSeen: 12247, BootstrapsDone: 5, ProviderRecords: 539413, 
+......
+[NumHeads: 0, Uptime: 3h25m12s, MemoryUsage: 399 MB, PeersConnected: 840, TotalUniquePeersSeen: 14654, BootstrapsDone: 5, ProviderRecords: 541867,
+......
+[NumHeads: 0, Uptime: 3h50m31s, MemoryUsage: 333 MB, PeersConnected: 839, TotalUniquePeersSeen: 14752, BootstrapsDone: 5, ProviderRecords: 542010, 
+......
 ```
 其PeersConnected增长到3k+后增长缓慢，而且在3h后PeersConnected会大幅下降，这与论文中的数据严重不符  
 不知道是不是ipfs版本更新出了一些新的策略来针对hydra-booster这类爬虫  
