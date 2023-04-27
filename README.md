@@ -1,16 +1,16 @@
 ## Table of Contents
 
 - [简介](#简介)
-- [Thesis](#Thesis)
-  - [Crawling-IPFS-Networking20-Demo](#Crawling-IPFS-Networking20-Demo)
-  - [IPFS-Churn-ICDCSW22](#IPFS-Churn-ICDCSW22)
-  - [IPFS-ICDCS22](#IPFS-ICDCS22)
-  - [IPFS-Measurement-SIGCOMM22](#IPFS-Measurement-SIGCOMM22)
-- [Data Collection](#Data Collection)
-  - [ipfs-crawler 主动爬取DHT_server](#ipfs-crawler 主动爬取DHT_server)
-  - [go-ipfs(kubo) 被动爬取ipfs中的peers](#go-ipfs(kubo) 被动爬取ipfs中的peers)
-  - [hydra-booster 被动爬取ipfs中的peers](#hydra-booster 被动爬取ipfs中的peers)
-  - [nebula-crawler 主动爬取DHT_server](#nebula-crawler 主动爬取DHT_server)
+- [Thesis](#thesis)
+  - [Crawling-IPFS-Networking20-Demo](#crawling-ipfs-networking20-demo)
+  - [IPFS-Churn-ICDCSW22](#ipfs-churn-icdcsw22)
+  - [IPFS-ICDCS22](#ipfs-icdcs22)
+  - [IPFS-Measurement-SIGCOMM22](#ipfs-measurement-sigcomm22)
+- [Data Collection](#data-collection)
+  - [ipfs-crawler 主动爬取DHT_server](#ipfs-crawler-主动爬取dht_server)
+  - [go-ipfs(kubo) 被动爬取ipfs中的peers](#go-ipfs(kubo)-被动爬取ipfs中的peers)
+  - [hydra-booster 被动爬取ipfs中的peers](#hydra-booster-被动爬取ipfs中的peers)
+  - [nebula-crawler 主动爬取DHT_server](#nebula-crawler-主动爬取dht_server)
 - [疑惑的点](#疑惑的点)
 
 ## 简介
@@ -18,12 +18,12 @@
 
 ## Thesis
 ### Crawling-IPFS-Networking20-Demo
-该论文仅提供了一种数据采集的工具，即ipfs-crawler，详情可见[ipfs-crawler 主动爬取DHT_server](#ipfs-crawler 主动爬取DHT_server)
+该论文仅提供了一种数据采集的工具，即ipfs-crawler，详情可见[ipfs-crawler 主动爬取DHT_server](#ipfs-crawler-主动爬取dht_server)
 
 ### IPFS-Churn-ICDCSW22
 该论文介绍了一种passively来获取数据的方式，即爬虫伪装成正常的peers，来获取connected peers的数据。文中使用了两种工具，go-ipfs(kubo)与hydra-booster。两者的详情可见：
-- [go-ipfs(kubo) 被动爬取ipfs中的peers](#go-ipfs(kubo) 被动爬取ipfs中的peers)
-- [hydra-booster 被动爬取ipfs中的peers](#hydra-booster 被动爬取ipfs中的peers)
+- [go-ipfs(kubo) 被动爬取ipfs中的peers](#go-ipfs(kubo)-被动爬取ipfs中的peers)
+- [hydra-booster 被动爬取ipfs中的peers](#hydra-booster-被动爬取ipfs中的peers)
 
 论文通过上述工具，对数个时间段内的ipfs进行监控，并分析了Churn、网络规模、用户客户端等情况
 
@@ -42,7 +42,7 @@ bitswap的具体流程：为何论文中说如果收到了"want_have c"，如果
 
 ### IPFS-Measurement-SIGCOMM22
 该论文主要用到了三个数据集：
-- First Dataset: 抓取了所有DHT_server ，抓取工具：[nebula-crawler 主动爬取DHT_server](#nebula-crawler 主动爬取DHT_server)
+- First Dataset: 抓取了所有DHT_server ，抓取工具：[nebula-crawler 主动爬取DHT_server](#nebula-crawler-主动爬取dht_server)
 - Second Dataset: 拿了所有ipfs.io 网关的后台数据，这个我们拿不到
 - Third Dataset: 相当于实验，publish & retrive，在A节点上发布一个任意文件后再在B节点上看多久能取回，并且统计寻找peers所消耗的时间与数据传输所消耗的时间，TODO
 
@@ -60,7 +60,7 @@ ipfs-crawler 可以从boostrappers开始，不断获得未访问过的节点的k
 ```json
 {'NodeID': '12D3KooWSSWpPrUnhC6MbpwGka2AiLASW3nvsdtUYHLZf7L8LQkT', 'MultiAddrs': ['/ip4/127.0.0.1/udp/4001/quic', '/ip4/137.184.46.49/tcp/4001', '/ip4/127.0.0.1/tcp/4001', '/ip4/10.244.3.195/tcp/4001', '/ip4/137.184.46.49/udp/39162/quic', '/ip6/::1/udp/4001/quic', '/ip4/10.244.3.195/udp/4001/quic', '/ip6/::1/tcp/4001'], 'reachable': True, 'agent_version': 'kubo/0.14.0/e0fabd6'}
 ```
-其中[IPFS-Measurement-SIGCOMM22](#IPFS-Measurement-SIGCOMM22)根据Addrs中的ip所在地进行了分析，还有[IPFS-Churn-ICDCSW22](#IPFS-Churn-ICDCSW22)对agent_version的更新情况进行监测分析，有了上述数据后这些内容的复现都是不难的
+其中[IPFS-Measurement-SIGCOMM22](#ipfs-measurement-sigcomm22)根据Addrs中的ip所在地进行了分析，还有[IPFS-Churn-ICDCSW22](#ipfs-churn-icdcsw22)对agent_version的更新情况进行监测分析，有了上述数据后这些内容的复现都是不难的
 PS. 暂未深入源码分析是否连接失败时会重试，这会影响reachable的正确性与爬取的范围，之后可以看看
 
 - 2. peers之间的连通性（根据peers中的k-buckets）
@@ -85,8 +85,8 @@ SOURCE;TARGET;ONLINE;TIMESTAMP
 ### go-ipfs(kubo) 被动爬取ipfs中的peers
 github: https://github.com/ipfs/kubo
 “Kubo was the first IPFS implementation and is the most widely used one today. Implementing the Interplanetary Filesystem - the Web3 standard for content-addressing, interoperable with HTTP.”
-由[IPFS-ICDCS22](#IPFS-ICDCS22)中的介绍知，ipfs会通过swarm维护一定的connected peers，在检索某个CID时会优先使用bitswap来向connected peers询问是否有该CID的文件，如果没有，则再查找DHT。
-所以ipfs的peers之间会互相维持着一定数量的connections，数量根据LowWater与HighWater来确定，据[IPFS-Churn-ICDCSW22](#IPFS-Churn-ICDCSW22)描述，其在实验时仅修改了这两个数据。
+由[IPFS-ICDCS22](#ipfs-icdcs22)中的介绍知，ipfs会通过swarm维护一定的connected peers，在检索某个CID时会优先使用bitswap来向connected peers询问是否有该CID的文件，如果没有，则再查找DHT。
+所以ipfs的peers之间会互相维持着一定数量的connections，数量根据LowWater与HighWater来确定，据[IPFS-Churn-ICDCSW22](#ipfs-churn-icdcsw22)描述，其在实验时仅修改了这两个数据。
 
 **复现**
 - 如论文中所描述，修改LowWater&HighWater为 18000与20000
@@ -190,7 +190,7 @@ tang@ubuntu:~/clone_file/hydra-booster$ go run ./main.go -name hydra_0  -port-be
 
 ### nebula-crawler 主动爬取DHT_server
 github: https://github.com/dennis-tra/nebula
-与[ipfs-crawler 主动爬取DHT_server](#ipfs-crawler 主动爬取DHT_server)较为相似，实现原理上基本一样，目前还未深入了解过与ipfs-crawler细节上的不同（如性能、监控等）
+与[ipfs-crawler 主动爬取DHT_server](#ipfs-crawler-主动爬取dht_server)较为相似，实现原理上基本一样，目前还未深入了解过与ipfs-crawler细节上的不同（如性能、监控等）
 
 ## 疑惑的点
 ipfs的swarm：
