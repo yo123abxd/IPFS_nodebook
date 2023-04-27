@@ -89,7 +89,7 @@ github: https://github.com/ipfs/kubo
 所以ipfs的peers之间会互相维持着一定数量的connections，数量根据LowWater与HighWater来确定，据[IPFS-Churn-ICDCSW22](#ipfs-churn-icdcsw22)描述，其在实验时仅修改了这两个数据。  
 
 **复现**
-- 如论文中所描述，修改LowWater&HighWater为 18000与20000  
+- 如论文中所描述，修改LowWater&HighWater为 18000与20000
 ```
 tang@ubuntu:~$ cat ~/.ipfs/config 
 .....
@@ -102,7 +102,7 @@ tang@ubuntu:~$ cat ~/.ipfs/config
 ......
 ```
 
-- 启动ipfs daemon  
+- 启动ipfs daemon
 ```
 tang@ubuntu:~$ ipfs daemon
 Initializing daemon...
@@ -116,7 +116,7 @@ Golang version: go1.19.8
 Daemon is ready
 ```
 
-- 可以看到已连接的peers  
+- 可以看到已连接的peers
 ```
 tang@ubuntu:~$ ipfs swarm peers
 /ip4/104.131.131.82/udp/4001/quic/p2p/QmaCpDMGvV2BGHeYERUEnRQAwe3N8SzbUtfsmvsqQLuvuJ
@@ -127,7 +127,7 @@ tang@ubuntu:~$ ipfs swarm peers
 ......
 ```
 
-- 还可以获得CID的信息  
+- 还可以获得CID的信息
 ```
 tang@ubuntu:~$ ipfs id 12D3KooWEFfELn8766a7DQaPmtCwRQMTxo1ibGjordKqXSS1xfS9
 {
