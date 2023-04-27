@@ -101,6 +101,7 @@ tang@ubuntu:~$ cat ~/.ipfs/config
     },
 ......
 ```
+
 - 启动ipfs daemon  
 ```
 tang@ubuntu:~$ ipfs daemon
@@ -114,6 +115,7 @@ Golang version: go1.19.8
 
 Daemon is ready
 ```
+
 - 可以看到已连接的peers  
 ```
 tang@ubuntu:~$ ipfs swarm peers
@@ -124,6 +126,7 @@ tang@ubuntu:~$ ipfs swarm peers
 /ip4/139.178.91.71/udp/4001/quic/p2p/QmNnooDu7bfjPFoTZYxMNLWUQJyrVwtbZg5gBMjTezGAJN
 ......
 ```
+
 - 还可以获得CID的信息  
 ```
 tang@ubuntu:~$ ipfs id 12D3KooWEFfELn8766a7DQaPmtCwRQMTxo1ibGjordKqXSS1xfS9
@@ -158,6 +161,7 @@ tang@ubuntu:~$ ipfs id 12D3KooWEFfELn8766a7DQaPmtCwRQMTxo1ibGjordKqXSS1xfS9
         ]
 }
 ```
+
 通过上述信息，我们可以获得论文中的所有数据：连接时长、ipfs version的变化、connections的变化等  
 
 **有问题的点：**
